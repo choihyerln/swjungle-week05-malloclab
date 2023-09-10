@@ -83,7 +83,7 @@ typedef struct {
     double util;     /* space utilization for this trace (always 0 for libc) */
 
     /* Note: secs and util are only defined if valid is true */
-} stats_t; 
+} stats_t;
 
 /********************
  * Global variables
