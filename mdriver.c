@@ -106,8 +106,7 @@ static char *default_tracefiles[] = {
  *********************/
 
 /* these functions manipulate range lists */
-static int add_range(range_t **ranges, char *lo, int size, 
-		     int tracenum, int opnum);
+static int add_range(range_t **ranges, char *lo, int size, int tracenum, int opnum);
 static void remove_range(range_t **ranges, char *lo);
 static void clear_ranges(range_t **ranges);
 
