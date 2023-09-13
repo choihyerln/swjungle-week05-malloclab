@@ -38,7 +38,7 @@ team_t team = {
 #define WSIZE 4    // 워드와 헤더/푸터 사이즈
 #define DSIZE 8    // 더블 워드 사이즈
 #define CHUNKSIZE (1<<12)   // 힙을 한번 늘릴 때 필요한 사이즈 = 이 양만큼 힙을 확장함 (4kb 분량)
-#define LISTLIMIT 30    // malloc은 2의 20승 이상의 값 안들어옴
+#define LISTLIMIT 20    // malloc은 2의 20승 이상의 값 안들어옴
 
 #define MAX(x,y) ((x) > (y) ? (x) : (y))
 
@@ -83,7 +83,7 @@ static void remove_block(void *bp);
 
 /* 정적 전역 변수 */
 static void *heap_listp;
-static void *free_array[LISTLIMIT];
+static void *free_array[LISTLIMIT+1];
 
 /* 
  * mm_init - 할당기 초기화
@@ -92,7 +92,7 @@ int mm_init(void) {
     heap_listp = mem_sbrk(2 * DSIZE);
 
     // free_array 초기화
-    for (int list=0; list<LISTLIMIT; list++) {
+    for (int list=0; list<=LISTLIMIT; list++) {
         free_array[list] = NULL;
     }
     
@@ -101,7 +101,7 @@ int mm_init(void) {
         return -1;
     
     /* padding, prol_header, prol_footer, PREC, succ, epil_header */
-    PUT(heap_listp, PACK(0,1));     // padding
+    PUT(heap_listp, 0);     // padding
     PUT(heap_listp + (1*WSIZE), PACK(DSIZE, 1));   // 프롤로그 헤더
     PUT(heap_listp + (2*WSIZE), PACK(DSIZE, 1));   // 프롤로그 푸터
     PUT(heap_listp + (3*WSIZE), PACK(0, 1));     // 에필로그 헤더
@@ -262,8 +262,10 @@ void *mm_malloc(size_t size) {
         return NULL;
 
     // 오버헤드, alignment 요청 포함해서 블록 사이즈 조정
-    asize = DSIZE * ((size + (DSIZE + DSIZE) + (DSIZE-1)) / DSIZE);
-    // printf("malloc asize: %d, input size: %d\n\n", asize, size);
+    asize = DSIZE * ((size + (DSIZE) + (DSIZE-1)) / DSIZE);
+    if (asize > (1 << LISTLIMIT)) {
+        printf("asize: %d\n", asize);
+    }
     // find_fit으로 asize의 크기를 넣을 수 있는 공간이 있다면
     if ((bp = find_fit(asize)) != NULL) {
         placement(bp, asize);
@@ -288,7 +290,7 @@ static void *find_fit(size_t asize) {
     int idx = find_idx(asize);
     void *bp;
 
-    for (int i=idx; i<LISTLIMIT; i++) {
+    for (int i=idx; i<=LISTLIMIT; i++) {
         for (bp = free_array[i]; bp != NULL; bp = SUCC_FREE(bp)) {
             if (GET_SIZE(HDRP(bp)) >= asize)
                 return bp;
