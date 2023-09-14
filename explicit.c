@@ -104,6 +104,8 @@ int mm_init(void) {
     // 가용리스트에 블록이 추가될 때마다 항상 리스트의 제일 앞에 추가될 것이므로 지금 생성한 프롤로그 블록은 항상 가용리스트의 끝에 위치함
     free_listp = heap_listp + DSIZE;       // 탐색 시작점
 
+    if (extend_heap(4) == NULL)
+        return -1;
     // CHUNKSIZE = 4096, 빈 힙을 CHUNKSIZE 바이트의 사용 가능한 블록으로 확장
     // 공간이 없다면 return -1
     if (extend_heap(CHUNKSIZE/WSIZE) == NULL)

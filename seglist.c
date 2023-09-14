@@ -108,6 +108,9 @@ int mm_init(void) {
 
     heap_listp += DSIZE;
 
+    if (extend_heap(4) == NULL)
+        return -1;
+        
     // CHUNKSIZE = 4096, 빈 힙을 CHUNKSIZE 바이트의 사용 가능한 블록으로 확장
     // 공간이 없다면 return -1
     if (extend_heap(CHUNKSIZE/WSIZE) == NULL)
